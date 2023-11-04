@@ -1,4 +1,11 @@
-
+#
+# Copyright (C) 2021-2022 by TeamAloneOp@Github, < https://github.com/TeamAloneOp >.
+#
+# This file is part of < https://github.com/TeamAloneOp/AloneMusicBot > project,
+# and is released under the "GNU v3.0 License Agreement".
+# Please see < https://github.com/TeamAloneOp/AloneMusicBot/blob/master/LICENSE >
+#
+# All rights reserved.
 
 import asyncio
 from datetime import datetime, timedelta
@@ -9,7 +16,6 @@ from pyrogram.errors import (ChatAdminRequired,
                              UserAlreadyParticipant,
                              UserNotParticipant)
 from pyrogram.types import InlineKeyboardMarkup
-from pyrogram.enums import ChatMemberStatus
 from pytgcalls import PyTgCalls, StreamType
 from pytgcalls.exceptions import (AlreadyJoinedError,
                                   NoActiveGroupCall,
@@ -53,50 +59,45 @@ async def _clear_(chat_id):
 class Call(PyTgCalls):
     def __init__(self):
         self.userbot1 = Client(
-            name="StrangerAsst1",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            session_string=str(config.STRING1),
+            session_name=str(config.STRING1),
         )
         self.one = PyTgCalls(
             self.userbot1,
             cache_duration=100,
         )
         self.userbot2 = Client(
-            name="StrangerAsst2",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            session_string=str(config.STRING2),
+            session_name=str(config.STRING2),
         )
         self.two = PyTgCalls(
             self.userbot2,
             cache_duration=100,
         )
         self.userbot3 = Client(
-            name="StrangerAsst3",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            session_string=str(config.STRING3),
+            session_name=str(config.STRING3),
         )
         self.three = PyTgCalls(
             self.userbot3,
             cache_duration=100,
         )
         self.userbot4 = Client(
-            name="StrangerAsst4",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            session_string=str(config.STRING4),
+            session_name=str(config.STRING4),
         )
         self.four = PyTgCalls(
             self.userbot4,
             cache_duration=100,
         )
         self.userbot5 = Client(
-            name="StrangerAsst5",
             api_id=config.API_ID,
             api_hash=config.API_HASH,
-            session_string=str(config.STRING5),
+            session_name=str(config.STRING5),
         )
         self.five = PyTgCalls(
             self.userbot5,
@@ -204,9 +205,9 @@ class Call(PyTgCalls):
                 get = await app.get_chat_member(chat_id, userbot.id)
             except ChatAdminRequired:
                 raise AssistantErr(_["call_1"])
-            if get.status == ChatMemberStatus.BANNED or get.status == ChatMemberStatus.RESTRICTED:
+            if get.status == "banned" or get.status == "kicked":
                 raise AssistantErr(
-                    _["call_2"].format(userbot.id,userbot.name,userbot.username)
+                    _["call_2"].format(userbot.username, userbot.id)
                 )
         except UserNotParticipant:
             chat = await app.get_chat(chat_id)
@@ -239,7 +240,7 @@ class Call(PyTgCalls):
                     except Exception as e:
                         raise AssistantErr(e)
                     m = await app.send_message(
-                        original_chat_id, _["call_5"].format(userbot.name,chat.title)
+                        original_chat_id, _["call_5"]
                     )
                     if invitelink.startswith("https://t.me/+"):
                         invitelink = invitelink.replace(
@@ -351,7 +352,6 @@ class Call(PyTgCalls):
             video_stream_quality = await get_video_bitrate(chat_id)
             videoid = check[0]["vidid"]
             check[0]["played"] = 0
-            user_idd=check[0]["user_id"]
             if "live_" in queued:
                 n, link = await YouTube.video(videoid, True)
                 if n == 0:
@@ -377,16 +377,14 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_9"],
                     )
-                img = await gen_thumb(videoid,user_idd)
+                img = await gen_thumb(videoid)
                 button = telegram_markup(_, chat_id)
                 run = await app.send_photo(
                     original_chat_id,
                     photo=img,
                     caption=_["stream_1"].format(
-                        title[:30],
-                        f"https://t.me/{app.username}?start=info_{videoid}",
-                        check[0]["dur"],
                         user,
+                        f"https://t.me/{app.username}?start=info_{videoid}",
                     ),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
@@ -428,17 +426,15 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_9"],
                     )
-                img = await gen_thumb(videoid,user_idd)
+                img = await gen_thumb(videoid)
                 button = stream_markup(_, videoid, chat_id)
                 await mystic.delete()
                 run = await app.send_photo(
                     original_chat_id,
                     photo=img,
                     caption=_["stream_1"].format(
-                        title[:30],
-                        f"https://t.me/{app.username}?start=info_{videoid}",
-                        check[0]["dur"],
                         user,
+                        f"https://t.me/{app.username}?start=info_{videoid}",
                     ),
                     reply_markup=InlineKeyboardMarkup(button),
                 )
@@ -518,16 +514,14 @@ class Call(PyTgCalls):
                     db[chat_id][0]["mystic"] = run
                     db[chat_id][0]["markup"] = "tg"
                 else:
-                    img = await gen_thumb(videoid,user_idd)
+                    img = await gen_thumb(videoid)
                     button = stream_markup(_, videoid, chat_id)
                     run = await app.send_photo(
                         original_chat_id,
                         photo=img,
                         caption=_["stream_1"].format(
-                            title[:30],
-                            f"https://t.me/{app.username}?start=info_{videoid}",
-                            check[0]["dur"],
                             user,
+                            f"https://t.me/{app.username}?start=info_{videoid}",
                         ),
                         reply_markup=InlineKeyboardMarkup(button),
                     )
@@ -629,4 +623,4 @@ class Call(PyTgCalls):
                 autoend[chat_id] = {}
 
 
-Stranger = Call()
+Alone = Call()
